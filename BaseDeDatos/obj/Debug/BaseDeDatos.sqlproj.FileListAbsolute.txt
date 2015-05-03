@@ -1,0 +1,4 @@
+C:\Users\RODRIGO\Desktop\Utnn\PRACTICA PROFESIONAL\Main\BaseDeDatos\bin\Debug\BaseDeDatos.dacpac
+C:\Users\RODRIGO\Desktop\Utnn\PRACTICA PROFESIONAL\Main\BaseDeDatos\obj\Debug\BaseDeDatos.dll
+C:\Users\RODRIGO\Desktop\Utnn\PRACTICA PROFESIONAL\Main\BaseDeDatos\obj\Debug\BaseDeDatos.pdb
+C:\Users\RODRIGO\Desktop\Utnn\PRACTICA PROFESIONAL\Main\BaseDeDatos\sql\debug\BaseDeDatos.dacpac

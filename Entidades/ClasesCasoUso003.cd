@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="UTN.SistemaAlumnos.Entidades.AcademicoPorParcial">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABCUAAAIAAACAkAAAABAAAAEAAAAgAgAAAgAAAQAAg=</HashCode>
+      <FileName>academicoPorParcial.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UTN.SistemaAlumnos.Entidades.CorrelatividaRendir">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAIAAAAAAABAAAAAAAAAAAAIgA=</HashCode>
+      <FileName>CorrelatividaRendir.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UTN.SistemaAlumnos.Entidades.dtoAlumno">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAQAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>dtoAlumno.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UTN.SistemaAlumnos.Entidades.dtoInscriptoRendir">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAIAAAAAAQAAAAAAAAAAAAAJAA=</HashCode>
+      <FileName>dtoInscriptoRendir.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UTN.SistemaAlumnos.Entidades.dtoNotaFinal">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAEIAAAAAAAAAAAAAAAAAAAAIBA=</HashCode>
+      <FileName>dtoNotaFinal.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

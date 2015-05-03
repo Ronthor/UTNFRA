@@ -1,0 +1,1794 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UTN.Framework.Data</name>
+    </assembly>
+    <members>
+        <member name="T:UTN.Framework.Data.Oracle.OracleDatabase">
+            <summary>
+            <para>Represents an Oracle database.</para>
+            </summary>
+            <remarks> 
+            <para>
+            Internally uses Oracle .NET Managed Provider from Microsoft (System.Data.OracleClient) to connect to a Oracle 9i database.
+            </para>  
+            <para>
+            When retrieving a result set, it will build the package name. The package name should be set based
+            on the stored procedure prefix and this should be set via configuration. For 
+            example, a package name should be set as prefix of "ENTLIB_" and package name of
+            "pkgENTLIB_ARCHITECTURE". For your applications, this is required only if you are defining your stored procedures returning 
+            ref cursors.
+            </para>
+            </remarks>
+        </member>
+        <member name="T:UTN.Framework.Data.Database">
+            <summary>
+            Represents an abstract database that commands can be run against. 
+            </summary>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.#ctor(System.String,System.Data.Common.DbProviderFactory)">
+            <summary>
+            Initializes a new instance of the <see cref="T:UTN.Framework.Data.Database"/> class with a connection string and a <see cref="T:System.Data.Common.DbProviderFactory"/>.
+            </summary>
+            <param name="connectionString">The connection string for the database.</param>
+            <param name="dbProviderFactory">A <see cref="T:System.Data.Common.DbProviderFactory"/> object.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.CreateConnection">
+            <summary>
+            <para>creates a connection for this database.</para>
+            <seealso cref="T:System.Data.Common.DbConnection"/>        
+            </summary>
+            <returns>
+            <para>The <see cref="T:System.Data.Common.DbConnection"/> for this database.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.GetStoredProcCommand(System.String)">
+            <summary>
+            <para>Creates a <see cref="T:System.Data.Common.DbCommand"/> for a stored procedure.</para>
+            </summary>
+            <param name="storedProcedureName"><para>The name of the stored procedure.</para></param>
+            <returns><para>The <see cref="T:System.Data.Common.DbCommand"/> for the stored procedure.</para></returns>       
+        </member>
+        <member name="M:UTN.Framework.Data.Database.GetStoredProcCommand(System.String,System.Object[])">
+            <summary>
+            <para>Creates a <see cref="T:System.Data.Common.DbCommand"/> for a stored procedure.</para>
+            </summary>
+            <param name="storedProcedureName"><para>The name of the stored procedure.</para></param>
+            <param name="parameterValues"><para>The list of parameters for the procedure.</para></param>
+            <returns><para>The <see cref="T:System.Data.Common.DbCommand"/> for the stored procedure.</para></returns>
+            <remarks>
+            <para>The parameters for the stored procedure will be discovered and the values are assigned in positional order.</para>
+            </remarks>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.GetStoredProcCommandWithSourceColumns(System.String,System.String[])">
+            <summary>
+            Wraps around a derived class's implementation of the GetStoredProcCommandWrapper method and adds functionality for
+            using this method with UpdateDataSet.  The GetStoredProcCommandWrapper method (above) that takes a params array 
+            expects the array to be filled with VALUES for the parameters. This method differs from the GetStoredProcCommandWrapper 
+            method in that it allows a user to pass in a string array. It will also dynamically discover the parameters for the 
+            stored procedure and set the parameter's SourceColumns to the strings that are passed in. It does this by mapping 
+            the parameters to the strings IN ORDER. Thus, order is very important.
+            </summary>
+            <param name="storedProcedureName"><para>The name of the stored procedure.</para></param>
+            <param name="sourceColumns"><para>The list of DataFields for the procedure.</para></param>
+            <returns><para>The <see cref="T:System.Data.Common.DbCommand"/> for the stored procedure.</para></returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.GetSqlStringCommand(System.String)">
+            <summary>
+            <para>Creates a <see cref="T:System.Data.Common.DbCommand"/> for a SQL query.</para>
+            </summary>
+            <param name="query"><para>The text of the query.</para></param>        
+            <returns><para>The <see cref="T:System.Data.Common.DbCommand"/> for the SQL query.</para></returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.GetDataAdapter">
+            <summary>
+            Gets the DbDataAdapter with the given update behavior and connection from the proper derived class.
+            Created this new, public method instead of modifying the protected, abstract one so that there will be no
+            breaking changes for any currently derived Database class.
+            </summary>
+            <returns>An <see cref="T:System.Data.Common.DbDataAdapter"/>.</returns>
+            <seealso cref="T:System.Data.Common.DbDataAdapter"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.GetDataAdapter(UTN.Framework.Data.UpdateBehavior)">
+            <summary>
+            <para>When overridden in a derived class, creates a <see cref="T:System.Data.Common.DbDataAdapter"/> with the given update behavior and connection.</para>        
+            </summary>
+            <param name="updateBehavior">
+            <para>One of the <see cref="T:UTN.Framework.Data.UpdateBehavior"/> values.</para>
+            </param>        
+            <returns>An <see cref="T:System.Data.Common.DbDataAdapter"/>.</returns>
+            <seealso cref="T:System.Data.Common.DbDataAdapter"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.SetUpRowUpdatedEvent(System.Data.Common.DbDataAdapter)">
+            <summary>
+            Sets the RowUpdated event for the data adapter.
+            </summary>
+            <param name="adapter">The <see cref="T:System.Data.Common.DbDataAdapter"/> to set the event.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.LoadDataSet(System.Data.Common.DbCommand,System.Data.DataSet,System.String)">
+            <summary>
+            <para>Executes the <paramref name="command"/> and adds a new <see cref="T:System.Data.DataTable"></see> to the existing <see cref="T:System.Data.DataSet"></see>.</para>
+            </summary>
+            <param name="command">
+            <para>The <see cref="T:System.Data.Common.DbCommand"/> to execute.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to load.</para>
+            </param>
+            <param name="tableName">
+            <para>The name for the new <see cref="T:System.Data.DataTable"/> to add to the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>        
+            <exception cref="T:System.ArgumentNullException">Any input parameter was null</exception>
+            <exception cref="T:System.ArgumentException">tableName was an empty string</exception>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.LoadDataSet(System.Data.Common.DbCommand,System.Data.DataSet,System.String,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes the <paramref name="command"/> within the given <paramref name="transaction"/> and adds a new <see cref="T:System.Data.DataTable"></see> to the existing <see cref="T:System.Data.DataSet"></see>.</para>
+            </summary>
+            <param name="command">
+            <para>The <see cref="T:System.Data.Common.DbCommand"/> to execute.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to load.</para>
+            </param>
+            <param name="tableName">
+            <para>The name for the new <see cref="T:System.Data.DataTable"/> to add to the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>        
+            <exception cref="T:System.ArgumentNullException">Any input parameter was null.</exception>
+            <exception cref="T:System.ArgumentException">tableName was an empty string.</exception>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.LoadDataSet(System.Data.Common.DbCommand,System.Data.DataSet,System.String[])">
+            <summary>
+            <para>Loads a <see cref="T:System.Data.DataSet"/> from a <see cref="T:System.Data.Common.DbCommand"/>.</para>
+            </summary>
+            <param name="command">
+            <para>The command to execute to fill the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to fill.</para>
+            </param>
+            <param name="tableNames">
+            <para>An array of table name mappings for the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.LoadDataSet(System.Data.Common.DbCommand,System.Data.DataSet,System.String[],System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Loads a <see cref="T:System.Data.DataSet"/> from a <see cref="T:System.Data.Common.DbCommand"/> in  a transaction.</para>
+            </summary>
+            <param name="command">
+            <para>The command to execute to fill the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to fill.</para>
+            </param>
+            <param name="tableNames">
+            <para>An array of table name mappings for the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command in.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.LoadDataSet(System.String,System.Data.DataSet,System.String[],System.Object[])">
+            <summary>
+            <para>Loads a <see cref="T:System.Data.DataSet"/> with the results returned from a stored procedure.</para>
+            </summary>
+            <param name="storedProcedureName">
+            <para>The stored procedure name to execute.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to fill.</para>
+            </param>
+            <param name="tableNames">
+            <para>An array of table name mappings for the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.LoadDataSet(System.Data.Common.DbTransaction,System.String,System.Data.DataSet,System.String[],System.Object[])">
+            <summary>
+            <para>Loads a <see cref="T:System.Data.DataSet"/> with the results returned from a stored procedure executed in a transaction.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the stored procedure in.</para>
+            </param>
+            <param name="storedProcedureName">
+            <para>The stored procedure name to execute.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to fill.</para>
+            </param>
+            <param name="tableNames">
+            <para>An array of table name mappings for the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.LoadDataSet(System.Data.CommandType,System.String,System.Data.DataSet,System.String[])">
+            <summary>
+            <para>Loads a <see cref="T:System.Data.DataSet"/> from command text.</para>
+            </summary>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to fill.</para>
+            </param>
+            <param name="tableNames">
+            <para>An array of table name mappings for the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.LoadDataSet(System.Data.Common.DbTransaction,System.Data.CommandType,System.String,System.Data.DataSet,System.String[])">
+            <summary>
+            <para>Loads a <see cref="T:System.Data.DataSet"/> from command text in a transaction.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command in.</para>
+            </param>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to fill.</para>
+            </param>
+            <param name="tableNames">
+            <para>An array of table name mappings for the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataSet(System.Data.Common.DbCommand)">
+            <summary>
+            <para>Executes the <paramref name="command"/> and returns the results in a new <see cref="T:System.Data.DataSet"/>.</para>
+            </summary>
+            <param name="command"><para>The <see cref="T:System.Data.Common.DbCommand"/> to execute.</para></param>
+            <returns>A <see cref="T:System.Data.DataSet"/> with the results of the <paramref name="command"/>.</returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataSet(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes the <paramref name="command"/> as part of the <paramref name="transaction"/> and returns the results in a new <see cref="T:System.Data.DataSet"/>.</para>
+            </summary>
+            <param name="command"><para>The <see cref="T:System.Data.Common.DbCommand"/> to execute.</para></param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <returns>A <see cref="T:System.Data.DataSet"/> with the results of the <paramref name="command"/>.</returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataSet(System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> with <paramref name="parameterValues"/> and returns the results in a new <see cref="T:System.Data.DataSet"/>.</para>
+            </summary>
+            <param name="storedProcedureName">
+            <para>The stored procedure to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>A <see cref="T:System.Data.DataSet"/> with the results of the <paramref name="storedProcedureName"/>.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataSet(System.Data.Common.DbTransaction,System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> with <paramref name="parameterValues"/> as part of the <paramref name="transaction"/> and returns the results in a new <see cref="T:System.Data.DataSet"/> within a transaction.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="storedProcedureName">
+            <para>The stored procedure to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>A <see cref="T:System.Data.DataSet"/> with the results of the <paramref name="storedProcedureName"/>.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataSet(System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> interpreted as specified by the <paramref name="commandType"/> and returns the results in a new <see cref="T:System.Data.DataSet"/>.</para>
+            </summary>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>A <see cref="T:System.Data.DataSet"/> with the results of the <paramref name="commandText"/>.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataSet(System.Data.Common.DbTransaction,System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> as part of the given <paramref name="transaction"/> and returns the results in a new <see cref="T:System.Data.DataSet"/>.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>A <see cref="T:System.Data.DataSet"/> with the results of the <paramref name="commandText"/>.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataTable(System.Data.Common.DbCommand)">
+            <summary>
+            <para>Executes the <paramref name="command"/> and returns the results in a new standalone <see cref="T:System.Data.DataTable"/>.</para>
+            </summary>
+            <param name="command"><para>The <see cref="T:System.Data.Common.DbCommand"/> to execute.</para></param>
+            <returns>A standalone <see cref="T:System.Data.DataTable"/> with the results of the <paramref name="command"/>.</returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataTable(System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> interpreted as specified by the <paramref name="commandType"/> and returns the results in a new standalone <see cref="T:System.Data.DataTable"/>.</para>
+            </summary>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>A standalone <see cref="T:System.Data.DataTable"/> with the results of the <paramref name="commandText"/>.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataTable(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes the <paramref name="command"/> as part of the <paramref name="transaction"/> and returns the results in a new standalone <see cref="T:System.Data.DataTable"/>.</para>
+            </summary>
+            <param name="command"><para>The <see cref="T:System.Data.Common.DbCommand"/> to execute.</para></param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <returns>A standalone <see cref="T:System.Data.DataTable"/> with the results of the <paramref name="command"/>.</returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataTable(System.Data.Common.DbTransaction,System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> as part of the given <paramref name="transaction"/> and returns the results in a new standalone <see cref="T:System.Data.DataTable"/>.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>A standalone <see cref="T:System.Data.DataTable"/> with the results of the <paramref name="commandText"/>.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataTable(System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> with <paramref name="parameterValues"/> and returns the results in a new standalone <see cref="T:System.Data.DataTable"/>.</para>
+            </summary>
+            <param name="storedProcedureName">
+            <para>The stored procedure to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>A standalone <see cref="T:System.Data.DataSet"/> with the results of the <paramref name="storedProcedureName"/>.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteDataTable(System.Data.Common.DbTransaction,System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> with <paramref name="parameterValues"/> as part of the <paramref name="transaction"/> and returns the results in a new standalone <see cref="T:System.Data.DataTable"/> within a transaction.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="storedProcedureName">
+            <para>The stored procedure to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>A standalone <see cref="T:System.Data.DataTable"/> with the results of the <paramref name="storedProcedureName"/>.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteScalar(System.Data.Common.DbCommand)">
+            <summary>
+            <para>Executes the <paramref name="command"/> and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored.</para>
+            </summary>
+            <param name="command">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <returns>
+            <para>The first column of the first row in the result set.</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteScalar(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes the <paramref name="command"/> within a <paramref name="transaction"/>, and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored.</para>
+            </summary>
+            <param name="command">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <returns>
+            <para>The first column of the first row in the result set.</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteScalar(System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> with the given <paramref name="parameterValues"/> and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored.</para>
+            </summary>
+            <param name="storedProcedureName">
+            <para>The stored procedure to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>The first column of the first row in the result set.</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteScalar(System.Data.Common.DbTransaction,System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> with the given <paramref name="parameterValues"/> within a 
+            <paramref name="transaction"/> and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="storedProcedureName">
+            <para>The stored procedure to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>The first column of the first row in the result set.</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteScalar(System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> interpreted as specified by the <paramref name="commandType"/>  and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored.</para>
+            </summary>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>The first column of the first row in the result set.</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteScalar(System.Data.Common.DbTransaction,System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> interpreted as specified by the <paramref name="commandType"/> 
+            within the given <paramref name="transaction"/> and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>The first column of the first row in the result set.</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteNonQuery(System.Data.Common.DbCommand)">
+            <summary>
+            <para>Executes the <paramref name="command"/> and returns the number of rows affected.</para>
+            </summary>
+            <param name="command">
+            <para>The command that contains the query to execute.</para>
+            </param>       
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteNonQuery(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes the <paramref name="command"/> within the given <paramref name="transaction"/>, and returns the number of rows affected.</para>
+            </summary>
+            <param name="command">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteNonQuery(System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> using the given <paramref name="parameterValues"/> and returns the number of rows affected.</para>
+            </summary>
+            <param name="storedProcedureName">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>The number of rows affected</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteNonQuery(System.Data.Common.DbTransaction,System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> using the given <paramref name="parameterValues"/> within a transaction and returns the number of rows affected.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="storedProcedureName">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>The number of rows affected.</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteNonQuery(System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> interpreted as specified by the <paramref name="commandType"/> and returns the number of rows affected.</para>
+            </summary>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>The number of rows affected.</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteNonQuery(System.Data.Common.DbTransaction,System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> interpreted as specified by the <paramref name="commandType"/> as part of the given <paramref name="transaction"/> and returns the number of rows affected.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>The number of rows affected</para>
+            </returns>
+            <seealso cref="M:System.Data.IDbCommand.ExecuteScalar"/>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteReader(System.Data.Common.DbCommand)">
+            <summary>
+            <para>Executes the <paramref name="command"/> and returns an <see cref="T:System.Data.IDataReader"></see> through which the result can be read.
+            It is the responsibility of the caller to close the connection and reader when finished.</para>
+            </summary>
+            <param name="command">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <returns>
+            <para>An <see cref="T:System.Data.IDataReader"/> object.</para>
+            </returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteReader(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes the <paramref name="command"/> within a transaction and returns an <see cref="T:System.Data.IDataReader"></see> through which the result can be read.
+            It is the responsibility of the caller to close the connection and reader when finished.</para>
+            </summary>
+            <param name="command">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <returns>
+            <para>An <see cref="T:System.Data.IDataReader"/> object.</para>
+            </returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteReader(System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> with the given <paramref name="parameterValues"/> and returns an <see cref="T:System.Data.IDataReader"></see> through which the result can be read.
+            It is the responsibility of the caller to close the connection and reader when finished.</para>
+            </summary>        
+            <param name="storedProcedureName">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>An <see cref="T:System.Data.IDataReader"/> object.</para>
+            </returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteReader(System.Data.Common.DbTransaction,System.String,System.Object[])">
+            <summary>
+            <para>Executes the <paramref name="storedProcedureName"/> with the given <paramref name="parameterValues"/> within the given <paramref name="transaction"/> and returns an <see cref="T:System.Data.IDataReader"></see> through which the result can be read.
+            It is the responsibility of the caller to close the connection and reader when finished.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="storedProcedureName">
+            <para>The command that contains the query to execute.</para>
+            </param>
+            <param name="parameterValues">
+            <para>An array of paramters to pass to the stored procedure. The parameter values must be in call order as they appear in the stored procedure.</para>
+            </param>
+            <returns>
+            <para>An <see cref="T:System.Data.IDataReader"/> object.</para>
+            </returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteReader(System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> interpreted as specified by the <paramref name="commandType"/> and returns an <see cref="T:System.Data.IDataReader"></see> through which the result can be read.
+            It is the responsibility of the caller to close the connection and reader when finished.</para>
+            </summary>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>An <see cref="T:System.Data.IDataReader"/> object.</para>
+            </returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ExecuteReader(System.Data.Common.DbTransaction,System.Data.CommandType,System.String)">
+            <summary>
+            <para>Executes the <paramref name="commandText"/> interpreted as specified by the <paramref name="commandType"/> within the given 
+            <paramref name="transaction"/> and returns an <see cref="T:System.Data.IDataReader"></see> through which the result can be read.
+            It is the responsibility of the caller to close the connection and reader when finished.</para>
+            </summary>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <param name="commandType">
+            <para>One of the <see cref="T:System.Data.CommandType"/> values.</para>
+            </param>
+            <param name="commandText">
+            <para>The command text to execute.</para>
+            </param>
+            <returns>
+            <para>An <see cref="T:System.Data.IDataReader"/> object.</para>
+            </returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.UpdateDataSet(System.Data.DataSet,System.String,System.Data.Common.DbCommand,System.Data.Common.DbCommand,System.Data.Common.DbCommand,UTN.Framework.Data.UpdateBehavior)">
+            <summary>
+            <para>Calls the respective INSERT, UPDATE, or DELETE statements for each inserted, updated, or deleted row in the <see cref="T:System.Data.DataSet"/>.</para>
+            </summary>        
+            <param name="dataSet"><para>The <see cref="T:System.Data.DataSet"/> used to update the data source.</para></param>
+            <param name="tableName"><para>The name of the source table to use for table mapping.</para></param>
+            <param name="insertCommand"><para>The <see cref="T:System.Data.Common.DbCommand"/> executed when <see cref="T:System.Data.DataRowState"/> is <seealso cref="F:System.Data.DataRowState.Added"/></para></param>
+            <param name="updateCommand"><para>The <see cref="T:System.Data.Common.DbCommand"/> executed when <see cref="T:System.Data.DataRowState"/> is <seealso cref="F:System.Data.DataRowState.Modified"/></para></param>        
+            <param name="deleteCommand"><para>The <see cref="T:System.Data.Common.DbCommand"/> executed when <see cref="T:System.Data.DataRowState"/> is <seealso cref="F:System.Data.DataRowState.Deleted"/></para></param>        
+            <param name="updateBehavior"><para>One of the <see cref="T:UTN.Framework.Data.UpdateBehavior"/> values.</para></param>
+            <returns>number of records affected</returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.UpdateDataSet(System.Data.DataSet,System.String,System.Data.Common.DbCommand,System.Data.Common.DbCommand,System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Calls the respective INSERT, UPDATE, or DELETE statements for each inserted, updated, or deleted row in the <see cref="T:System.Data.DataSet"/> within a transaction.</para>
+            </summary>        
+            <param name="dataSet"><para>The <see cref="T:System.Data.DataSet"/> used to update the data source.</para></param>
+            <param name="tableName"><para>The name of the source table to use for table mapping.</para></param>
+            <param name="insertCommand"><para>The <see cref="T:System.Data.Common.DbCommand"/> executed when <see cref="T:System.Data.DataRowState"/> is <seealso cref="F:System.Data.DataRowState.Added"/>.</para></param>
+            <param name="updateCommand"><para>The <see cref="T:System.Data.Common.DbCommand"/> executed when <see cref="T:System.Data.DataRowState"/> is <seealso cref="F:System.Data.DataRowState.Modified"/>.</para></param>        
+            <param name="deleteCommand"><para>The <see cref="T:System.Data.Common.DbCommand"/> executed when <see cref="T:System.Data.DataRowState"/> is <seealso cref="F:System.Data.DataRowState.Deleted"/>.</para></param>        
+            <param name="transaction"><para>The <see cref="T:System.Data.IDbTransaction"/> to use.</para></param>
+            <returns>Number of records affected.</returns>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.AddParameter(System.Data.Common.DbCommand,System.String,System.Data.DbType,System.Int32,System.Data.ParameterDirection,System.Boolean,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command.</para>
+            </summary>
+            <param name="command">The command to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>
+            <param name="size"><para>The maximum size of the data within the column.</para></param>
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>
+            <param name="nullable"><para>Avalue indicating whether the parameter accepts null values.</para></param>
+            <param name="precision"><para>The maximum number of digits used to represent the <paramref name="value"/>.</para></param>
+            <param name="scale"><para>The number of decimal places to which <paramref name="value"/> is resolved.</para></param>
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>       
+        </member>
+        <member name="M:UTN.Framework.Data.Database.AddParameter(System.Data.Common.DbCommand,System.String,System.Data.DbType,System.Data.ParameterDirection,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command.</para>
+            </summary>
+            <param name="command">The command to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>        
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>                
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>    
+        </member>
+        <member name="M:UTN.Framework.Data.Database.AddOutParameter(System.Data.Common.DbCommand,System.String,System.Data.DbType,System.Int32)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command set as a <see cref="T:System.Data.ParameterDirection"/> value of Output.</para>
+            </summary>
+            <param name="command">The command to add the out parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>        
+            <param name="size"><para>The maximum size of the data within the column.</para></param>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.AddInParameter(System.Data.Common.DbCommand,System.String,System.Data.DbType)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command set as a <see cref="T:System.Data.ParameterDirection"/> value of Input.</para>
+            </summary>
+            <param name="command">The command to add the in parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>                
+            <remarks>
+            <para>This version of the method is used when you can have the same parameter object multiple times with different values.</para>
+            </remarks>        
+        </member>
+        <member name="M:UTN.Framework.Data.Database.AddInParameter(System.Data.Common.DbCommand,System.String,System.Data.DbType,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command set as a <see cref="T:System.Data.ParameterDirection"/> value of Input.</para>
+            </summary>
+            <param name="command">The commmand to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>                
+            <param name="value"><para>The value of the parameter.</para></param>      
+        </member>
+        <member name="M:UTN.Framework.Data.Database.AddInParameter(System.Data.Common.DbCommand,System.String,System.Data.DbType,System.String,System.Data.DataRowVersion)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command set as a <see cref="T:System.Data.ParameterDirection"/> value of Input.</para>
+            </summary>
+            <param name="command">The command to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>                
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the value.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ClearParameterCache">
+            <summary>
+            Clears the parameter cache. Since there is only one parameter cache that is shared by all instances
+            of this class, this clears all parameters cached for all databases.
+            </summary>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.SetParameterValue(System.Data.Common.DbCommand,System.String,System.Object)">
+            <summary>
+            Sets a parameter value.
+            </summary>
+            <param name="command">The command with the parameter.</param>
+            <param name="parameterName">The parameter name.</param>
+            <param name="value">The parameter value.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.GetParameterValue(System.Data.Common.DbCommand,System.String)">
+            <summary>
+            Gets a parameter value.
+            </summary>
+            <param name="command">The command that contains the parameter.</param>
+            <param name="name">The name of the parameter.</param>
+            <returns>The value of the parameter.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.PrepareCommand(System.Data.Common.DbCommand,System.Data.Common.DbConnection)">
+            <summary>
+            <para>Assigns a <paramref name="connection"/> to the <paramref name="command"/> and discovers parameters if needed.</para>
+            </summary>
+            <param name="command"><para>The command that contains the query to prepare.</para></param>
+            <param name="connection">The connection to assign to the command.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.PrepareCommand(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Assigns a <paramref name="transaction"/> to the <paramref name="command"/> and discovers parameters if needed.</para>
+            </summary>
+            <param name="command"><para>The command that contains the query to prepare.</para></param>
+            <param name="transaction">The transaction to assign to the command.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.OpenConnection">
+            <summary>
+            <para>Opens a connection.</para>
+            </summary>
+            <returns>The opened connection.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.SameNumberOfParametersAndValues(System.Data.Common.DbCommand,System.Object[])">
+            <summary>
+            Determines if the number of parameters in the command matches the array of parameter values.
+            </summary>
+            <param name="command">The <see cref="T:System.Data.Common.DbCommand"/> containing the parameters.</param>
+            <param name="values">The array of parameter values.</param>
+            <returns><see langword="true"/> if the number of parameters and values match; otherwise, <see langword="false"/>.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.BuildParameterName(System.String)">
+            <summary>
+            Builds a value parameter name for the current database.
+            </summary>
+            <param name="name">The name of the parameter.</param>
+            <returns>A correctly formated parameter name.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.DiscoverParameters(System.Data.Common.DbCommand)">
+            <summary>
+            Discovers the parameters for a <see cref="T:System.Data.Common.DbCommand"/>.
+            </summary>
+            <param name="command">The <see cref="T:System.Data.Common.DbCommand"/> to discover the parameters.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.DeriveParameters(System.Data.Common.DbCommand)">
+            <summary>
+            Retrieves parameter information from the stored procedure specified in the <see cref="T:System.Data.Common.DbCommand"/> and populates the Parameters collection of the specified <see cref="T:System.Data.Common.DbCommand"/> object. 
+            </summary>
+            <param name="discoveryCommand">The <see cref="T:System.Data.Common.DbCommand"/> to do the discovery.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.CreateParameter(System.String,System.Data.DbType,System.Int32,System.Data.ParameterDirection,System.Boolean,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object.</para>
+            </summary>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>
+            <param name="size"><para>The maximum size of the data within the column.</para></param>
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>
+            <param name="nullable"><para>Avalue indicating whether the parameter accepts null values.</para></param>
+            <param name="precision"><para>The maximum number of digits used to represent the <paramref name="value"/>.</para></param>
+            <param name="scale"><para>The number of decimal places to which <paramref name="value"/> is resolved.</para></param>
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>  
+        </member>
+        <member name="M:UTN.Framework.Data.Database.CreateParameter(System.String)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object.</para>
+            </summary>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <returns><para>An unconfigured parameter.</para></returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.UserParametersStartIndex">
+            <summary>
+            Returns the starting index for parameters in a command.
+            </summary>
+            <returns>The starting index for parameters in a command.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Database.ConfigureParameter(System.Data.Common.DbParameter,System.String,System.Data.DbType,System.Int32,System.Data.ParameterDirection,System.Boolean,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            Configures a given <see cref="T:System.Data.Common.DbParameter"/>.
+            </summary>
+            <param name="param">The <see cref="T:System.Data.Common.DbParameter"/> to configure.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>
+            <param name="size"><para>The maximum size of the data within the column.</para></param>
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>
+            <param name="nullable"><para>Avalue indicating whether the parameter accepts null values.</para></param>
+            <param name="precision"><para>The maximum number of digits used to represent the <paramref name="value"/>.</para></param>
+            <param name="scale"><para>The number of decimal places to which <paramref name="value"/> is resolved.</para></param>
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>  
+        </member>
+        <member name="P:UTN.Framework.Data.Database.ConnectionString">
+            <summary>
+            <para>Gets the string used to open a database.</para>
+            <seealso cref="P:System.Data.Common.DbConnection.ConnectionString"/>
+            </summary>
+            <value>
+            <para>The string used to open a database.</para>
+            </value>
+        </member>
+        <member name="P:UTN.Framework.Data.Database.ConnectionStringNoCredentials">
+            <summary>
+            <para>Gets the connection string without the username and password.</para>
+            <seealso cref="P:UTN.Framework.Data.Database.ConnectionString"/>
+            </summary>
+            <value>
+            <para>The connection string without the username and password.</para>
+            </value>
+        </member>
+        <member name="P:UTN.Framework.Data.Database.ConnectionStringWithoutCredentials">
+            <summary>
+            Gets the connection string without credentials.
+            </summary>
+            <value>
+            The connection string without credentials.
+            </value>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:UTN.Framework.Data.Oracle.OracleDatabase"/> class with a connection string and a list of Oracle packages.
+            </summary>
+            <param name="connectionString">The connection string for the database.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.#ctor(System.String,System.Collections.Generic.IList{UTN.Framework.Data.Oracle.IOraclePackage})">
+            <summary>
+            Initializes a new instance of the <see cref="T:UTN.Framework.Data.Oracle.OracleDatabase"/> class with a connection string and a list of Oracle packages.
+            </summary>
+            <param name="connectionString">The connection string for the database.</param>
+            <param name="packages">A list of <see cref="T:UTN.Framework.Data.Oracle.IOraclePackage"/> objects.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.AddParameter(System.Data.Common.DbCommand,System.String,System.Data.DbType,System.Int32,System.Data.ParameterDirection,System.Boolean,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command.</para>
+            </summary>
+            <param name="command">The command to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>
+            <param name="size"><para>The maximum size of the data within the column.</para></param>
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>
+            <param name="nullable"><para>Avalue indicating whether the parameter accepts null values.</para></param>
+            <param name="precision"><para>The maximum number of digits used to represent the <paramref name="value"/>.</para></param>
+            <param name="scale"><para>The number of decimal places to which <paramref name="value"/> is resolved.</para></param>
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>       
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.AddParameter(System.Data.OracleClient.OracleCommand,System.String,System.Data.OracleClient.OracleType,System.Int32,System.Data.ParameterDirection,System.Boolean,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            <para>Adds a new instance of an <see cref="T:System.Data.OracleClient.OracleParameter"/> object to the command.</para>
+            </summary>
+            <param name="command">The <see cref="T:System.Data.OracleClient.OracleCommand"/> to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="oracleType"><para>One of the <see cref="T:System.Data.OracleClient.OracleType"/> values.</para></param>
+            <param name="size"><para>The maximum size of the data within the column.</para></param>
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>
+            <param name="nullable"><para>Avalue indicating whether the parameter accepts null values.</para></param>
+            <param name="precision"><para>The maximum number of digits used to represent the <paramref name="value"/>.</para></param>
+            <param name="scale"><para>The number of decimal places to which <paramref name="value"/> is resolved.</para></param>
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>      
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.ExecuteReader(System.Data.Common.DbCommand)">
+            <summary>
+            Creates an <see cref="T:System.Data.OracleClient.OracleDataReader"/> based on the <paramref name="command"/>.
+            </summary>
+            <param name="command">The command wrapper to execute.</param>        
+            <returns>An <see cref="T:System.Data.OracleClient.OracleDataReader"/> object.</returns>        
+            <exception cref="T:System.ArgumentNullException">
+            <para><paramref name="command"/> can not be <see langword="null"/> (Nothing in Visual Basic).</para>
+            </exception>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.ExecuteReader(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Creates an <see cref="T:System.Data.OracleClient.OracleDataReader"/> based on the <paramref name="command"/>.</para>
+            </summary>        
+            <param name="command"><para>The command wrapper to execute.</para></param>        
+            <param name="transaction"><para>The transaction to participate in when executing this reader.</para></param>        
+            <returns><para>An <see cref="T:System.Data.OracleClient.OracleDataReader"/> object.</para></returns>
+            <exception cref="T:System.ArgumentNullException">
+            <para><paramref name="command"/> can not be <see langword="null"/> (Nothing in Visual Basic).</para>
+            <para>- or -</para>
+            <para><paramref name="transaction"/> can not be <see langword="null"/> (Nothing in Visual Basic).</para>
+            </exception>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.ExecuteDataSet(System.Data.Common.DbCommand)">
+            <summary>
+            <para>Executes a command and returns the results in a new <see cref="T:System.Data.DataSet"/>.</para>
+            </summary>
+            <param name="command"><para>The command to execute to fill the <see cref="T:System.Data.DataSet"/></para></param>
+            <returns><para>A <see cref="T:System.Data.DataSet"/> filed with records and, if necessary, schema.</para></returns>
+            <exception cref="T:System.ArgumentNullException">
+            <para><paramref name="command"/> can not be <see langword="null"/> (Nothing in Visual Basic).</para>
+            </exception>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.ExecuteDataSet(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes a command and returns the result in a new <see cref="T:System.Data.DataSet"/>.</para>
+            </summary>
+            <param name="command"><para>The command to execute to fill the <see cref="T:System.Data.DataSet"/></para></param>
+            <param name="transaction"><para>The transaction to participate in when executing this reader.</para></param>        
+            <returns><para>A <see cref="T:System.Data.DataSet"/> filed with records and, if necessary, schema.</para></returns>
+            <exception cref="T:System.ArgumentNullException">
+            <para><paramref name="command"/> can not be <see langword="null"/>.</para>
+            </exception>
+            <exception cref="T:System.ArgumentNullException">
+            <para><paramref name="command"/> can not be <see langword="null"/>.</para>
+            <para>- or -</para>
+            <para><paramref name="transaction"/> can not be <see langword="null"/>.</para>
+            </exception>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.ExecuteDataTable(System.Data.Common.DbCommand)">
+            <summary>
+            <para>Executes a command and returns the results in a new standalone <see cref="T:System.Data.DataTable"/>.</para>
+            </summary>
+            <param name="command"><para>The command to execute to fill the <see cref="T:System.Data.DataSet"/></para></param>
+            <returns><para>A standalone <see cref="T:System.Data.DataTable"/> filed with records and, if necessary, schema.</para></returns>
+            <exception cref="T:System.ArgumentNullException">
+            <para><paramref name="command"/> can not be <see langword="null"/> (Nothing in Visual Basic).</para>
+            </exception>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.ExecuteDataTable(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes a command and returns the result in a new standalone <see cref="T:System.Data.DataTable"/>.</para>
+            </summary>
+            <param name="command"><para>The command to execute to fill the <see cref="T:System.Data.DataSet"/></para></param>
+            <param name="transaction"><para>The transaction to participate in when executing this reader.</para></param>        
+            <returns><para>A standalone <see cref="T:System.Data.DataTable"/> filed with records and, if necessary, schema.</para></returns>
+            <exception cref="T:System.ArgumentNullException">
+            <para><paramref name="command"/> can not be <see langword="null"/>.</para>
+            </exception>
+            <exception cref="T:System.ArgumentNullException">
+            <para><paramref name="command"/> can not be <see langword="null"/>.</para>
+            <para>- or -</para>
+            <para><paramref name="transaction"/> can not be <see langword="null"/>.</para>
+            </exception>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.LoadDataSet(System.Data.Common.DbCommand,System.Data.DataSet,System.String[])">
+            <summary>
+            <para>Loads a <see cref="T:System.Data.DataSet"/> from a <see cref="T:System.Data.Common.DbCommand"/>.</para>
+            </summary>
+            <param name="command">
+            <para>The command to execute to fill the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to fill.</para>
+            </param>
+            <param name="tableNames">
+            <para>An array of table name mappings for the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.LoadDataSet(System.Data.Common.DbCommand,System.Data.DataSet,System.String[],System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Loads a <see cref="T:System.Data.DataSet"/> from a <see cref="T:System.Data.Common.DbCommand"/> in a transaction.</para>
+            </summary>
+            <param name="command">
+            <para>The command to execute to fill the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="dataSet">
+            <para>The <see cref="T:System.Data.DataSet"/> to fill.</para>
+            </param>
+            <param name="tableNames">
+            <para>An array of table name mappings for the <see cref="T:System.Data.DataSet"/>.</para>
+            </param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command in.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.GetParameterValue(System.Data.Common.DbCommand,System.String)">
+            <summary>
+            Gets a parameter value.
+            </summary>
+            <param name="command">The command that contains the parameter.</param>
+            <param name="parameterName">The name of the parameter.</param>
+            <returns>The value of the parameter.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.SetParameterValue(System.Data.Common.DbCommand,System.String,System.Object)">
+            <summary>
+            Sets a parameter value.
+            </summary>
+            <param name="command">The command with the parameter.</param>
+            <param name="parameterName">The parameter name.</param>
+            <param name="value">The parameter value.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.PrepareCWRefCursor(System.Data.Common.DbCommand)">
+            <devdoc>
+            This is a private method that will build the Oracle package name if your stored procedure
+            has proper prefix and postfix. 
+            This functionality is include for
+            the portability of the architecture between SQL and Oracle datbase.
+            This method also adds the reference cursor to the command writer if not already added. This
+            is required for Oracle .NET managed data provider.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.OnOracleRowUpdated(System.Object,System.Data.OracleClient.OracleRowUpdatedEventArgs)">
+            <devdoc>
+            Listens for the RowUpdate event on a data adapter to support UpdateBehavior.Continue
+            </devdoc>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.DeriveParameters(System.Data.Common.DbCommand)">
+            <summary>
+            Retrieves parameter information from the stored procedure specified in the <see cref="T:System.Data.Common.DbCommand"/> and populates the Parameters collection of the specified <see cref="T:System.Data.Common.DbCommand"/> object. 
+            </summary>
+            <param name="discoveryCommand">The <see cref="T:System.Data.Common.DbCommand"/> to do the discovery.</param>
+            <remarks>
+            The <see cref="T:System.Data.Common.DbCommand"/> must be an instance of a <see cref="T:System.Data.OracleClient.OracleCommand"/> object.
+            </remarks>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.GetStoredProcCommand(System.String,System.Object[])">
+            <summary>
+            <para>Creates a <see cref="T:System.Data.Common.DbCommand"/> for a stored procedure.</para>
+            </summary>
+            <param name="storedProcedureName"><para>The name of the stored procedure.</para></param>
+            <param name="parameterValues"><para>The list of parameters for the procedure.</para></param>
+            <returns><para>The <see cref="T:System.Data.Common.DbCommand"/> for the stored procedure.</para></returns>
+            <remarks>
+            <para>The parameters for the stored procedure will be discovered and the values are assigned in positional order.</para>
+            </remarks>        
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.GetStoredProcCommand(System.String)">
+            <summary>
+            <para>Creates a <see cref="T:System.Data.Common.DbCommand"/> for a stored procedure.</para>
+            </summary>
+            <param name="storedProcedureName"><para>The name of the stored procedure.</para></param>		
+            <returns><para>The <see cref="T:System.Data.Common.DbCommand"/> for the stored procedure.</para></returns>
+            <remarks>
+            <para>The parameters for the stored procedure will be discovered and the values are assigned in positional order.</para>
+            </remarks>        
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.TranslatePackageSchema(System.String)">
+            <devdoc>
+            Looks into configuration and gets the information on how the command wrapper should be updated if calling a package on this
+            connection.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDatabase.SetUpRowUpdatedEvent(System.Data.Common.DbDataAdapter)">
+            <summary>
+            Sets the RowUpdated event for the data adapter.
+            </summary>
+            <param name="adapter">The <see cref="T:System.Data.Common.DbDataAdapter"/> to set the event.</param>
+            <remarks>The <see cref="T:System.Data.Common.DbDataAdapter"/> must be an <see cref="T:System.Data.OracleClient.OracleDataAdapter"/>.</remarks>
+        </member>
+        <member name="T:UTN.Framework.Data.ConnectionString">
+            <summary>
+            ConnectionString class constructs a connection string by 
+            inserting a username and password into a template.
+            </summary>
+            <summary>
+            This class provides connection string settings.
+            </summary>
+            <remarks>
+            It reads connection settings from the <seealso cref="T:System.Configuration.ConnectionStringSettings"/> section in the config file.
+            </remarks>
+        </member>
+        <member name="M:UTN.Framework.Data.ConnectionString.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:UTN.Framework.Data.ConnectionString"/> with a connection string, the user ID tokens and password tokens.
+            </summary>
+            <param name="connectionString">The connection string.</param>
+            <param name="userIdTokens">The user id tokens that can be parsed out of the connection string.</param>
+            <param name="passwordTokens">The password tokens that can be parsed out of the conection string.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.ConnectionString.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:UTN.Framework.Data.ConnectionString"/> with a connection string, the user ID tokens and password tokens.
+            </summary>
+            
+            
+            
+        </member>
+        <member name="M:UTN.Framework.Data.ConnectionString.ToString">
+            <devdoc>
+            Gets the formatted connection string.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.ConnectionString.ToStringNoCredentials">
+            <devdoc>
+            Gets the formatted connection string without the username and password.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.ConnectionString.CreateNewConnectionString(System.String)">
+            <summary>
+            Formats a new connection string with a user ID and password.
+            </summary>  
+            <param name="connectionStringToFormat">
+            The connection string to format.
+            </param>		
+        </member>
+        <member name="M:UTN.Framework.Data.ConnectionString.GetFromConfig">
+             <summary>
+             Returns the connection <seealso cref="T:System.String"/> for the default connection.
+             </summary>
+             <remarks>
+             The default connection is the first one in the configurationStrings section
+             i.e.:
+             <code>
+             &lt;?xml version="1.0" encoding="utf-8"?&gt;
+             &lt;configuration&gt;
+              &lt;connectionStrings&gt;
+                &lt;add name="ConnStr1" connectionString="LocalSqlServer: data source=127.0.0.1;Integrated Security=SSPI;Initial Catalog=aspnetdb"
+                  providerName="System.Data.SqlClient" /&gt;
+              &lt;/connectionStrings&gt;
+            &lt;/configuration&gt;
+             </code>
+             </remarks>
+             <example>
+            		<code>string connStr = DataAccess.GetConnection();</code>
+             </example>
+             <returns>The default <seealso cref="T:System.String"/> from the config section</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.ConnectionString.GetFromConfig(System.String)">
+             <summary>
+             Gets a connection <seealso cref="T:System.String"/> based on the name.
+             </summary>
+             <param name="name">The name of the connection</param>
+             <remarks>
+             i.e.:
+             <code>
+             &lt;?xml version="1.0" encoding="utf-8"?&gt;
+             &lt;configuration&gt;
+              &lt;connectionStrings&gt;
+                &lt;add name="ConnStr1" connectionString="LocalSqlServer: data source=127.0.0.1;Integrated Security=SSPI;Initial Catalog=aspnetdb"
+                  providerName="System.Data.SqlClient" /&gt;
+              &lt;/connectionStrings&gt;
+            &lt;/configuration&gt;
+             </code>
+             </remarks>
+             <example>
+            		<code>ConnectionStringSettings conn = DataAccess.GetNamedConnection("ConnStr1");</code>
+             </example>
+             <returns>The connection <seealso cref="T:System.String"/> that matches the name</returns>
+        </member>
+        <member name="P:UTN.Framework.Data.ConnectionString.UserName">
+            <devdoc>
+            Database username for the connection string.
+            </devdoc>
+        </member>
+        <member name="P:UTN.Framework.Data.ConnectionString.Password">
+            <devdoc>
+            User password for the connection string.
+            </devdoc>
+        </member>
+        <member name="P:UTN.Framework.Data.ConnectionString.Name">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.ConnectionString.ProviderName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:UTN.Framework.Data.Sql.SqlDatabase">
+            <summary>
+            <para>Represents a SQL Server database.</para>
+            </summary>
+            <remarks> 
+            <para>
+            Internally uses SQL Server .NET Managed Provider from Microsoft (System.Data.SqlClient) to connect to the database.
+            </para>  
+            </remarks>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:UTN.Framework.Data.Sql.SqlDatabase"/> class with a connection string.
+            </summary>
+            <param name="connectionString">The connection string.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.ExecuteXmlReader(System.Data.Common.DbCommand)">
+            <summary>
+            <para>Executes the <see cref="T:System.Data.SqlClient.SqlCommand"/> and returns an <see cref="T:System.Xml.XmlReader"/>.</para>
+            </summary>
+            <param name="command">
+            <para>The <see cref="T:System.Data.SqlClient.SqlCommand"/> to execute.</para>
+            </param>
+            <returns>
+            <para>An <see cref="T:System.Xml.XmlReader"/> object.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.ExecuteXmlReader(System.Data.Common.DbCommand,System.Data.Common.DbTransaction)">
+            <summary>
+            <para>Executes the <see cref="T:System.Data.SqlClient.SqlCommand"/> in a transaction and returns an <see cref="T:System.Xml.XmlReader"/>.</para>
+            </summary>
+            <param name="command">
+            <para>The <see cref="T:System.Data.SqlClient.SqlCommand"/> to execute.</para>
+            </param>
+            <param name="transaction">
+            <para>The <see cref="T:System.Data.IDbTransaction"/> to execute the command within.</para>
+            </param>
+            <returns>
+            <para>An <see cref="T:System.Xml.XmlReader"/> object.</para>
+            </returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.DoExecuteXmlReader(System.Data.SqlClient.SqlCommand)">
+            <devdoc>
+            Execute the actual XML Reader call.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.OnSqlRowUpdated(System.Object,System.Data.SqlClient.SqlRowUpdatedEventArgs)">
+            <devdoc>
+            Listens for the RowUpdate event on a dataadapter to support UpdateBehavior.Continue
+            </devdoc>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.DeriveParameters(System.Data.Common.DbCommand)">
+            <summary>
+            Retrieves parameter information from the stored procedure specified in the <see cref="T:System.Data.Common.DbCommand"/> and populates the Parameters collection of the specified <see cref="T:System.Data.Common.DbCommand"/> object. 
+            </summary>
+            <param name="discoveryCommand">The <see cref="T:System.Data.Common.DbCommand"/> to do the discovery.</param>
+            <remarks>The <see cref="T:System.Data.Common.DbCommand"/> must be a <see cref="T:System.Data.SqlClient.SqlCommand"/> instance.</remarks>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.UserParametersStartIndex">
+            <summary>
+            Returns the starting index for parameters in a command.
+            </summary>
+            <returns>The starting index for parameters in a command.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.BuildParameterName(System.String)">
+            <summary>
+            Builds a value parameter name for the current database.
+            </summary>
+            <param name="name">The name of the parameter.</param>
+            <returns>A correctly formated parameter name.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.SetUpRowUpdatedEvent(System.Data.Common.DbDataAdapter)">
+            <summary>
+            Sets the RowUpdated event for the data adapter.
+            </summary>
+            <param name="adapter">The <see cref="T:System.Data.Common.DbDataAdapter"/> to set the event.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.SameNumberOfParametersAndValues(System.Data.Common.DbCommand,System.Object[])">
+            <summary>
+            Determines if the number of parameters in the command matches the array of parameter values.
+            </summary>
+            <param name="command">The <see cref="T:System.Data.Common.DbCommand"/> containing the parameters.</param>
+            <param name="values">The array of parameter values.</param>
+            <returns><see langword="true"/> if the number of parameters and values match; otherwise, <see langword="false"/>.</returns>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.AddParameter(System.Data.Common.DbCommand,System.String,System.Data.SqlDbType,System.Int32,System.Data.ParameterDirection,System.Boolean,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command.</para>
+            </summary>
+            <param name="command">The command to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>
+            <param name="size"><para>The maximum size of the data within the column.</para></param>
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>
+            <param name="nullable"><para>Avalue indicating whether the parameter accepts null values.</para></param>
+            <param name="precision"><para>The maximum number of digits used to represent the <paramref name="value"/>.</para></param>
+            <param name="scale"><para>The number of decimal places to which <paramref name="value"/> is resolved.</para></param>
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>       
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.AddParameter(System.Data.Common.DbCommand,System.String,System.Data.SqlDbType,System.Data.ParameterDirection,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command.</para>
+            </summary>
+            <param name="command">The command to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.SqlDbType"/> values.</para></param>        
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>                
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>    
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.AddOutParameter(System.Data.Common.DbCommand,System.String,System.Data.SqlDbType,System.Int32)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command set as a <see cref="T:System.Data.ParameterDirection"/> value of Output.</para>
+            </summary>
+            <param name="command">The command to add the out parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.SqlDbType"/> values.</para></param>        
+            <param name="size"><para>The maximum size of the data within the column.</para></param>        
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.AddInParameter(System.Data.Common.DbCommand,System.String,System.Data.SqlDbType)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command set as a <see cref="T:System.Data.ParameterDirection"/> value of Input.</para>
+            </summary>
+            <param name="command">The command to add the in parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.SqlDbType"/> values.</para></param>                
+            <remarks>
+            <para>This version of the method is used when you can have the same parameter object multiple times with different values.</para>
+            </remarks>        
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.AddInParameter(System.Data.Common.DbCommand,System.String,System.Data.SqlDbType,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command set as a <see cref="T:System.Data.ParameterDirection"/> value of Input.</para>
+            </summary>
+            <param name="command">The commmand to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.SqlDbType"/> values.</para></param>                
+            <param name="value"><para>The value of the parameter.</para></param>      
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.AddInParameter(System.Data.Common.DbCommand,System.String,System.Data.SqlDbType,System.String,System.Data.DataRowVersion)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object to the command set as a <see cref="T:System.Data.ParameterDirection"/> value of Input.</para>
+            </summary>
+            <param name="command">The command to add the parameter.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.SqlDbType"/> values.</para></param>                
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the value.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.CreateParameter(System.String,System.Data.SqlDbType,System.Int32,System.Data.ParameterDirection,System.Boolean,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            <para>Adds a new instance of a <see cref="T:System.Data.Common.DbParameter"/> object.</para>
+            </summary>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.DbType"/> values.</para></param>
+            <param name="size"><para>The maximum size of the data within the column.</para></param>
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>
+            <param name="nullable"><para>Avalue indicating whether the parameter accepts null values.</para></param>
+            <param name="precision"><para>The maximum number of digits used to represent the <paramref name="value"/>.</para></param>
+            <param name="scale"><para>The number of decimal places to which <paramref name="value"/> is resolved.</para></param>
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>  
+        </member>
+        <member name="M:UTN.Framework.Data.Sql.SqlDatabase.ConfigureParameter(System.Data.SqlClient.SqlParameter,System.String,System.Data.SqlDbType,System.Int32,System.Data.ParameterDirection,System.Boolean,System.Byte,System.Byte,System.String,System.Data.DataRowVersion,System.Object)">
+            <summary>
+            Configures a given <see cref="T:System.Data.Common.DbParameter"/>.
+            </summary>
+            <param name="param">The <see cref="T:System.Data.Common.DbParameter"/> to configure.</param>
+            <param name="name"><para>The name of the parameter.</para></param>
+            <param name="dbType"><para>One of the <see cref="T:System.Data.SqlDbType"/> values.</para></param>
+            <param name="size"><para>The maximum size of the data within the column.</para></param>
+            <param name="direction"><para>One of the <see cref="T:System.Data.ParameterDirection"/> values.</para></param>
+            <param name="nullable"><para>Avalue indicating whether the parameter accepts null values.</para></param>
+            <param name="precision"><para>The maximum number of digits used to represent the <paramref name="value"/>.</para></param>
+            <param name="scale"><para>The number of decimal places to which <paramref name="value"/> is resolved.</para></param>
+            <param name="sourceColumn"><para>The name of the source column mapped to the DataSet and used for loading or returning the <paramref name="value"/>.</para></param>
+            <param name="sourceVersion"><para>One of the <see cref="T:System.Data.DataRowVersion"/> values.</para></param>
+            <param name="value"><para>The value of the parameter.</para></param>  
+        </member>
+        <member name="P:UTN.Framework.Data.Sql.SqlDatabase.ParameterToken">
+            <summary>
+            <para>Gets the parameter token used to delimit parameters for the SQL Server database.</para>
+            </summary>
+            <value>
+            <para>The '@' symbol.</para>
+            </value>
+        </member>
+        <member name="T:UTN.Framework.Data.Oracle.OracleDataReaderWrapper">
+            <devdoc>
+            A wrapper to convert data for oracle for the reader.
+            </devdoc>
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDataReaderWrapper.GetBoolean(System.Int32)">
+            <devdoc>
+            Bit data type is mapped to a number in Oracle database. When reading bit data from Oracle database,
+            it will map to 0 as false and everything else as true.  This method uses System.Convert.ToBoolean() method
+            for type conversions.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDataReaderWrapper.GetFloat(System.Int32)">
+            <devdoc>
+            When reading number from Oracle, data reader gets it back at decimal regardless of data type in
+            Oracle database. This will cast the result to float data type.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.Oracle.OracleDataReaderWrapper.GetGuid(System.Int32)">
+            <devdoc>
+            This method will cast the result data Guid data type. In Oracle you must use that as Raw(16) so
+            that this method can convert that to Guid properly.
+            </devdoc>        
+        </member>
+        <member name="T:UTN.Framework.Data.DatabaseFactory">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:UTN.Framework.Data.DatabaseFactory.#ctor">
+            <summary>
+            Private constructor
+            </summary>
+        </member>
+        <member name="M:UTN.Framework.Data.DatabaseFactory.CreateDataBase">
+            <summary>
+            Gets the default DataBase
+            </summary>
+        </member>
+        <member name="M:UTN.Framework.Data.DatabaseFactory.CreateDataBase(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="name">Logger Name Section</param>
+        </member>
+        <member name="T:UTN.Framework.Data.CachingMechanism">
+            <devdoc>
+            CachingMechanism provides caching support for stored procedure 
+            parameter discovery and caching
+            </devdoc>
+        </member>
+        <member name="M:UTN.Framework.Data.CachingMechanism.CloneParameters(System.Data.IDataParameter[])">
+            <devdoc>
+            Create and return a copy of the IDataParameter array.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.CachingMechanism.Clear">
+            <devdoc>
+            Empties all items from the cache
+            </devdoc>
+        </member>
+        <member name="M:UTN.Framework.Data.CachingMechanism.AddParameterSetToCache(System.String,System.Data.IDbCommand,System.Data.IDataParameter[])">
+            <devdoc>
+            Add a parameter array to the cache for the command.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.CachingMechanism.GetCachedParameterSet(System.String,System.Data.IDbCommand)">
+            <devdoc>
+            Gets a parameter array from the cache for the command. Returns null if no parameters are found.
+            </devdoc>        
+        </member>
+        <member name="M:UTN.Framework.Data.CachingMechanism.IsParameterSetCached(System.String,System.Data.IDbCommand)">
+            <devdoc>
+            Gets if a given stored procedure on a specific connection string has a cached parameter set
+            </devdoc>        
+        </member>
+        <member name="T:UTN.Framework.Data.DataException">
+            <summary>
+            An Exception that can occurs during Data access
+            </summary>
+        </member>
+        <member name="M:UTN.Framework.Data.DataException.#ctor(System.String,System.Exception)">
+            <summary>
+            Creates a LocalizationException
+            </summary>
+            <param name="message">Exception message</param>
+            <param name="innerException">any inner Exception</param>
+        </member>
+        <member name="M:UTN.Framework.Data.DataException.#ctor(System.String)">
+            <summary>
+            Creates a LocalizationException
+            </summary>
+            <param name="message">Exception message</param>
+        </member>
+        <member name="T:UTN.Framework.Data.GenericDatabase">
+            <summary>
+            The <see cref="T:UTN.Framework.Data.GenericDatabase"/> is used when no specific behavior is required or known for a database.
+            </summary>
+            <remarks>
+            This database exposes the <see cref="T:System.Data.Common.DbProviderFactory"/> used to allow for a provider 
+            agnostic programming model.
+            </remarks>
+        </member>
+        <member name="M:UTN.Framework.Data.GenericDatabase.#ctor(System.String,System.Data.Common.DbProviderFactory)">
+            <summary>
+            Initializes a new instance of the <see cref="T:UTN.Framework.Data.GenericDatabase"/> class with a connection string and 
+            a provider factory.
+            </summary>
+            <param name="connectionString">The connection string.</param>
+            <param name="dbProviderFactory">The provider factory.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.GenericDatabase.DeriveParameters(System.Data.Common.DbCommand)">
+            <summary>
+            Retrieves parameter information from the stored procedure specified in the <see cref="T:System.Data.Common.DbCommand"/> and populates the Parameters collection of the specified <see cref="T:System.Data.Common.DbCommand"/> object. 
+            </summary>
+            <param name="discoveryCommand">The <see cref="T:System.Data.Common.DbCommand"/> to do the discovery.</param>
+            <remarks>There is not generic way to do it, the operation is not implemented for <see cref="T:UTN.Framework.Data.GenericDatabase"/>.</remarks>
+        </member>
+        <member name="T:UTN.Framework.Data.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.BlockName">
+            <summary>
+              Looks up a localized string similar to Enterprise Library Data Access Application Block.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.CommandExecutedCounterHelpResource">
+            <summary>
+              Looks up a localized string similar to Commands Executed/sec is the rate at which database commands were executed..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.CommandFailedCounterHelpResource">
+            <summary>
+              Looks up a localized string similar to Commands Failed/sec is tha rate at which database commands failed to execute..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ConfigurationFailureCreatingDatabase">
+            <summary>
+              Looks up a localized string similar to A configuration failure occurred while creating database ‘{0}’..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ConnectionFailedCounterHelpResource">
+            <summary>
+              Looks up a localized string similar to Connections Failed/sec is the rate at which database connections failed to open..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ConnectionOpenedCounterHelpResource">
+            <summary>
+              Looks up a localized string similar to Connections Opened/sec is the rate at which database connections were opened..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.CounterCategoryHelpResourceName">
+            <summary>
+              Looks up a localized string similar to Enterprise Library Data Performance Counter Instances.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ErrorConnectionFailedExtraInformation">
+            <summary>
+              Looks up a localized string similar to The connection string used was &quot;{0}&quot;..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ErrorConnectionFailedMessage">
+            <summary>
+              Looks up a localized string similar to The error occurred using the &quot;{0}&quot; database instance while attempting to open the database connection..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionCommandNotSqlCommand">
+            <summary>
+              Looks up a localized string similar to The command must be a SqlCommand..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionDatabaseTypeDoesNotHaveAssemblerAttribute">
+            <summary>
+              Looks up a localized string similar to The database type {0} for the name {1} does not have the required [DatabaseAssembler] attribute required to build the database object..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionDatabaseTypeDoesNotHaveRequiredConfigurationTypeAttribute">
+            <summary>
+              Looks up a localized string similar to The database type {0} does not have the required ConfigurationElementType attribute..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionMessageParameterMatchFailure">
+            <summary>
+              Looks up a localized string similar to The number of parameters does not match number of values for stored procedure..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionMessageUpdateDataSetArgumentFailure">
+            <summary>
+              Looks up a localized string similar to At least one command must be initialized.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionMessageUpdateDataSetRowFailure">
+            <summary>
+              Looks up a localized string similar to Failed to update row .
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionNoDatabaseDefined">
+            <summary>
+              Looks up a localized string similar to The requested database {0} is not defined in configuration..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionNoProviderDefinedForConnectionString">
+            <summary>
+              Looks up a localized string similar to The requested database {0} does not have provider name set in the connection string..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionNullOrEmptyString">
+            <summary>
+              Looks up a localized string similar to The value can not be null or an empty string..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionParameterDiscoveryNotSupportedOnGenericDatabase">
+            <summary>
+              Looks up a localized string similar to Parameter discovery is not supported for connections using GenericDatabase. You must specify the parameters explicitly, or configure the connection to use a type deriving from Database that supports parameter discovery..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionTableNameArrayEmpty">
+            <summary>
+              Looks up a localized string similar to The table name array used to map results to user-specified table names cannot be empty..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.ExceptionTypeNotDatabaseAssembler">
+            <summary>
+              Looks up a localized string similar to Type {0} is not an implementation of IDatabaseAssembler for DatabaseAssemblerAttribute..
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.FireCommandFailedError">
+            <summary>
+              Looks up a localized string similar to Fire Command Failed.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.NoConfigurationStringDefined">
+            <summary>
+              Looks up a localized string similar to No Configuration String Defined.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.NoProviderDefinedForConnectionString">
+            <summary>
+              Looks up a localized string similar to No Provider Defined For Connection String.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.Password">
+            <summary>
+              Looks up a localized string similar to Password,pwd.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Properties.Resources.UserName">
+            <summary>
+              Looks up a localized string similar to User id,uid.
+            </summary>
+        </member>
+        <member name="T:UTN.Framework.Data.UpdateBehavior">
+            <summary>
+            Used with the Database.UpdateDataSet method. Provides control over behavior when the Data
+            Adapter's update command encounters an error.
+            </summary>
+        </member>
+        <member name="F:UTN.Framework.Data.UpdateBehavior.Standard">
+            <summary>
+            No interference with the DataAdapter's Update command. If Update encounters
+            an error, the update stops.  Additional rows in the Datatable are uneffected.
+            </summary>
+        </member>
+        <member name="F:UTN.Framework.Data.UpdateBehavior.Continue">
+            <summary>
+            If the DataAdapter's Update command encounters an error, the update will
+            continue. The Update command will try to update the remaining rows. 
+            </summary>
+        </member>
+        <member name="F:UTN.Framework.Data.UpdateBehavior.Transactional">
+            <summary>
+            If the DataAdapter encounters an error, all updated rows will be rolled back.
+            </summary>
+        </member>
+        <member name="T:UTN.Framework.Data.Oracle.IOraclePackage">
+            <summary>
+            Represents the description of an oracle package.
+            </summary>
+        </member>
+        <member name="P:UTN.Framework.Data.Oracle.IOraclePackage.Name">
+            <summary>
+            When implemented by a class, gets the name of the package.
+            </summary>
+            <value>
+            The name of the package.
+            </value>
+        </member>
+        <member name="P:UTN.Framework.Data.Oracle.IOraclePackage.Prefix">
+            <summary>
+            When implemented by a class, gets the prefix for the package.
+            </summary>
+            <value>
+            The prefix for the package.
+            </value>
+        </member>
+        <member name="T:UTN.Framework.Data.ParameterCache">
+            <summary>
+            <para>
+            Provides parameter caching services for dynamic parameter discovery of stored procedures.
+            Eliminates the round-trip to the database to derive the parameters and types when a command
+            is executed more than once.
+            </para>
+            </summary>
+        </member>
+        <member name="M:UTN.Framework.Data.ParameterCache.SetParameters(System.Data.Common.DbCommand,UTN.Framework.Data.Database)">
+            <summary>
+            <para>
+            Populates the parameter collection for a command wrapper from the cache 
+            or performs a round-trip to the database to query the parameters.
+            </para>
+            </summary>
+            <param name="command">
+            <para>The command to add the parameters.</para>
+            </param>
+            <param name="database">
+            <para>The database to use to set the parameters.</para>
+            </param>
+        </member>
+        <member name="M:UTN.Framework.Data.ParameterCache.Clear">
+            <summary>
+            <para>Empties the parameter cache.</para>
+            </summary>
+        </member>
+        <member name="M:UTN.Framework.Data.ParameterCache.AddParametersFromCache(System.Data.Common.DbCommand,UTN.Framework.Data.Database)">
+            <summary>
+            <para>Adds parameters to a command using the cache.</para>
+            </summary>
+            <param name="command">
+            <para>The command to add the parameters.</para>
+            </param>
+            <param name="database">The database to use.</param>
+        </member>
+        <member name="M:UTN.Framework.Data.ParameterCache.AlreadyCached(System.Data.IDbCommand,UTN.Framework.Data.Database)">
+            <summary>
+            <para>Checks to see if a cache entry exists for a specific command on a specific connection</para>
+            </summary>
+            <param name="command">
+            <para>The command to check.</para>
+            </param>
+            <param name="database">The database to check.</param>
+            <returns>True if the parameters are already cached for the provided command, false otherwise</returns>
+        </member>
+    </members>
+</doc>
